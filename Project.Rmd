@@ -71,9 +71,41 @@ customer.data$lifespan <- customer.lifespan$lifespan[match(customer.data$id,cust
 ## 1.	Develop an attrition model, to predict whether a customer will cancel their subscription in the near future. Characterize your model performance.
 
 
-```{r}
 
+```{r}
+library(ggplot2)
+library(plyr)
+library(reshape2)
+library(splines)
+library(boot)
+library(broom)
+library(knitr)
+ltv <- read.csv("ltv_data.csv",header = TRUE)
+names(ltv)[1] <- 'id'
 ```
+
+```{r}
+#processing the date
+ltv$date <- as.Date(ltv$date,'%m/%d/%Y')
+ltv$month <- months(ltv$date)
+ltv$year <- format(ltv$date,format = '%Y')
+```
+
+```{r}
+#calculate the average value
+ltv.pages <- aggregate( pages ~ id+ month + year, ltv, mean)
+ltv.onsite <- aggregate( onsite ~ id + month + year, ltv, mean)
+#merger the table
+ltv.m1 <- merge(x = ltv.pages, y = ltv.onsite, by = c('id','month','year'), all.x = TRUE)
+```
+
+```{r}
+#sort the dataframe and export it
+ltv.m1 <- ltv.m1[order(ltv.m1$id),]
+write.csv(ltv.m1,'ltv_modelOne.csv',row.names = FALSE)
+```
+
+
 
 ## 2.	Develop a model for estimating the ltv of a customer. Characterize your model performance.
 
